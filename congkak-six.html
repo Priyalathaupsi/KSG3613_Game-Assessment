@@ -1,0 +1,412 @@
+<title>Responsibility Congkak</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Spline+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<script>if(new URLSearchParams(location.search).has("embedded"))document.documentElement.classList.add("embed");</script>
+<style>
+/* Layout: the congkak board is the stage; your six responsibility holes along the bottom, the temptations they guard along the top, the question card underneath */
+:root{
+  --paper:#F8F3E7; --paper2:#EFE6D2; --card:#FFFDF7; --ink:#1F3D3A; --muted:#5B6662; --line:#DCCFB4;
+  --teal:#2A7F78; --coral:#D9604A; --amber:#C98A1E; --violet:#6A5A9A;
+  --good:#2D7A4C; --bad:#B4432F;
+  --wood1:#B67D47; --wood2:#8A5A2E; --hole1:#4A2E17; --hole2:#2B1A0C; --seedA:#FFF6E3; --seedB:#E2B04E; --seedC:#8A5A2E;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Spline Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"Spline Sans Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#141A19; --paper2:#1D2523; --card:#1F2826; --ink:#ECE4D2; --muted:#A6ADA5; --line:#35413E;
+  --teal:#5BB8AF; --coral:#EE8A72; --amber:#E2B04E; --violet:#A895E0; --good:#6CC08E; --bad:#F08068;
+  --wood1:#8E5F35; --wood2:#5E3D1F;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#141A19; --paper2:#1D2523; --card:#1F2826; --ink:#ECE4D2; --muted:#A6ADA5; --line:#35413E;
+  --teal:#5BB8AF; --coral:#EE8A72; --amber:#E2B04E; --violet:#A895E0; --good:#6CC08E; --bad:#F08068;
+  --wood1:#8E5F35; --wood2:#5E3D1F;
+  color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.12}
+p{margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+.hint{color:var(--muted);font-size:.88rem}
+.c1{--rc:var(--teal)} .c2{--rc:var(--coral)} .c3{--rc:var(--amber)} .c4{--rc:var(--violet)} .c5{--rc:var(--teal)} .c6{--rc:var(--coral)}
+
+header h1{font-size:clamp(1.9rem,4.6vw,2.9rem);font-weight:800;color:var(--ink)}
+header p{max-width:70ch;margin-top:8px;font-size:1.04rem}
+.score{display:flex;flex-wrap:wrap;gap:10px 22px;font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+.score b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* board */
+.board{position:relative;display:grid;grid-template-columns:1.2fr repeat(6,1fr) 1.2fr;grid-template-rows:auto auto auto auto;column-gap:clamp(4px,1.3vw,14px);row-gap:6px;align-items:center;justify-items:center;padding:clamp(12px,2.6vw,26px) clamp(10px,2.6vw,28px);border-radius:999px;background:linear-gradient(180deg,var(--wood1),var(--wood2));border:3px solid #1F2A28;box-shadow:inset 0 3px 0 rgba(255,255,255,.22),inset 0 -6px 0 rgba(0,0,0,.25),0 6px 0 #1F2A28}
+.hole,.store{position:relative;border-radius:50%;background:radial-gradient(circle at 50% 38%,var(--hole1),var(--hole2) 70%);box-shadow:inset 0 4px 7px rgba(0,0,0,.65),0 1px 0 rgba(255,255,255,.25);display:grid;place-items:center;color:#FFF6E3;border:0;padding:0}
+.hole{width:clamp(38px,8.4vw,80px);aspect-ratio:1/1;transition:box-shadow .2s,transform .15s}
+.store{width:100%;max-width:120px;aspect-ratio:3/5;border-radius:48%;grid-row:2 / span 2}
+.store.mine{grid-column:8} .store.lost{grid-column:1}
+.store b{position:relative;z-index:1;font-family:var(--display);font-weight:800;font-size:clamp(1.3rem,3.6vw,2.3rem);text-shadow:0 1px 3px #000;margin-top:-34%}
+.store small{position:absolute;bottom:-1.7em;font-family:var(--mono);font-size:clamp(.5rem,1.3vw,.66rem);letter-spacing:.08em;text-transform:uppercase;color:#FFF6E3;white-space:nowrap}
+.hole .n{position:relative;z-index:1;font-family:var(--display);font-weight:800;font-size:clamp(.85rem,2.2vw,1.35rem);text-shadow:0 1px 2px #000;margin-top:-26%}
+.seeds{position:absolute;inset:56% 14% 9%;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:2px;pointer-events:none}
+.store .seeds{inset:58% 12% 10%}
+.seeds i,.fly{width:clamp(5px,1.05vw,9px);height:clamp(5px,1.05vw,9px);border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--seedA),var(--seedB) 55%,var(--seedC));display:block}
+.fly{position:absolute;z-index:6;width:12px;height:12px;margin:-6px 0 0 -6px;transition:transform .32s cubic-bezier(.4,.1,.4,1);box-shadow:0 2px 3px rgba(0,0,0,.45)}
+.fly.drop{transition:transform .5s cubic-bezier(.5,0,.8,.6),opacity .5s}
+.mine-row .hole{cursor:pointer}
+.mine-row .hole:not(:disabled):hover{transform:translateY(-3px)}
+.hole.pick{box-shadow:inset 0 4px 7px rgba(0,0,0,.65),0 0 0 4px var(--rc)}
+.hole.active{box-shadow:inset 0 4px 7px rgba(0,0,0,.65),0 0 0 5px #F6D58A;transform:translateY(-3px)}
+.hole.empty{opacity:.55}
+.hole.flashG{animation:flashG .6s} .hole.flashB{animation:flashB .6s}
+@keyframes flashG{40%{box-shadow:inset 0 4px 7px rgba(0,0,0,.65),0 0 0 7px #6CC08E}}
+@keyframes flashB{40%{box-shadow:inset 0 4px 7px rgba(0,0,0,.65),0 0 0 7px #F08068}}
+.lab{font-size:clamp(.56rem,1.35vw,.78rem);font-weight:600;line-height:1.15;text-align:center;color:#FFF6E3;text-shadow:0 1px 2px rgba(0,0,0,.6);max-width:100%;min-height:2.3em}
+.lab.top{align-self:end}
+.lab.bot{align-self:start}
+.tempt .hole{opacity:.9}
+.board .mid{grid-column:2 / span 6;grid-row:2 / span 2;width:100%;height:6px}
+.store.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.legend div{display:flex;gap:8px;align-items:center;font-size:.85rem}
+.legend i{width:24px;height:24px;border-radius:50%;background:var(--rc);color:#fff;font-style:normal;font-weight:700;display:grid;place-items:center;font-size:.75rem;flex:none}
+@media (min-width:700px){.legend{display:none}}
+@media (max-width:699px){.lab{display:none}.board{row-gap:10px}.store small{display:none}}
+
+/* question */
+.qcard{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:18px clamp(14px,3vw,24px);display:flex;flex-direction:column;gap:12px;box-shadow:0 4px 0 var(--line);min-height:200px}
+.qcard.c1,.qcard.c2,.qcard.c3,.qcard.c4,.qcard.c5,.qcard.c6{border-color:var(--rc);box-shadow:0 4px 0 var(--rc)}
+.qhead{display:flex;gap:12px;align-items:center}
+.qhead .dot{width:42px;height:42px;border-radius:50%;background:var(--rc);color:#fff;font-weight:700;display:grid;place-items:center;flex:none;font-size:1.1rem}
+.qhead h2{font-size:1.35rem}
+.qhead .sub{font-size:.88rem;color:var(--muted)}
+.q{font-size:1.08rem;font-weight:500;max-width:70ch}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:var(--paper2);border:2px solid var(--line);border-radius:9px;padding:11px 14px;font-weight:500}
+.opt:not(:disabled):hover{border-color:var(--rc);background:var(--card)}
+.opt.right{background:color-mix(in srgb,var(--good) 16%,var(--card));border-color:var(--good)}
+.opt.wrong{background:color-mix(in srgb,var(--bad) 13%,var(--card));border-color:var(--bad);text-decoration:line-through;text-decoration-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{border-left:5px solid var(--good);background:var(--paper2);padding:10px 14px;border-radius:0 8px 8px 0}
+.fb.bad{border-left-color:var(--bad)}
+.fb b{font-family:var(--display);font-size:1.05rem}
+.fb.good b{color:var(--good)} .fb.bad b{color:var(--bad)}
+.btn{background:var(--teal);color:#fff;border:0;border-radius:7px;padding:11px 20px;font-weight:600;box-shadow:0 3px 0 #1F2A28;width:max-content}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #1F2A28}
+.btn.ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--ink);box-shadow:none}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.big{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,7vw,3.8rem);line-height:1}
+.big.good{color:var(--good)} .big.bad{color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.n{font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Compact embed: use the whole panel for the board and questions. */
+html:has(body.embedded),body.embedded{margin:0;overflow:hidden;height:100%}
+body.embedded .wrap{max-width:none;padding:10px;gap:8px;height:100dvh;overflow:auto}
+body.embedded header{display:none}
+body.embedded .board{padding:12px 14px;column-gap:7px}
+body.embedded .hole{width:clamp(35px,5vw,70px)}
+body.embedded .qcard{padding:10px;gap:8px;min-height:0}
+body.embedded .q{font-size:.96rem}
+body.embedded .opt{font-size:.88rem;padding:7px 10px}
+
+/* Embedded in Ethics Summit: compact and harmonious with the other stages. */
+html.embed,html.embed body{height:100%;overflow:hidden!important}
+html.embed body{background:transparent;font-size:13px;color:#1f4354}
+html.embed .wrap{max-width:none;width:100%;height:100%;min-height:0;overflow:hidden;box-sizing:border-box;padding:8px 10px 10px;gap:7px}
+html.embed header{display:none}
+html.embed .score{font-size:11px;gap:5px 14px;flex:0 0 auto}
+html.embed .board{flex:0 0 auto;padding:10px 8px;border-radius:100px;column-gap:5px;row-gap:3px;box-shadow:0 3px 0 #294d53}
+html.embed .hole{width:min(5.2vw,56px);min-width:27px}
+html.embed .store{max-width:67px;min-width:34px}
+html.embed .lab{font-size:clamp(8px,.9vw,11px);min-height:1.8em}
+html.embed .qcard{flex:1 1 auto;min-height:0;padding:9px 12px;gap:7px;overflow:hidden;border-color:#b7dfe7;box-shadow:0 2px 0 #b7dfe7}
+html.embed .qhead h2{font:700 17px system-ui,sans-serif}
+html.embed .qhead .dot{height:29px;width:29px;font-size:13px}
+html.embed .qhead .sub{font-size:11px}
+html.embed .q{font-size:clamp(12px,1.15vw,15px);line-height:1.34}
+html.embed .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;min-height:0}
+html.embed .opt{font-size:clamp(11px,1vw,13px);line-height:1.25;padding:7px 9px;border-radius:7px}
+html.embed .fb{font-size:12px;line-height:1.3;padding:6px 9px}
+html.embed .hint{font-size:12px}
+html.embed .big{font-size:28px}
+html.embed .tbl{max-height:24vh;overflow:auto}
+html.embed .legend{display:none}
+@media(max-height:720px){html.embed .board{padding:5px 6px}html.embed .hole{width:min(4.6vw,46px)}html.embed .qcard{gap:5px;padding:6px 10px}html.embed .opt{font-size:11px;padding:5px 7px}}
+@media(max-width:650px){html.embed .lab{display:none}html.embed .board{padding:8px 5px}html.embed .hole{width:clamp(25px,5.6vw,43px)}html.embed .opts{grid-template-columns:1fr}html.embed .qcard{overflow:auto}html.embed .legend{display:none}}
+
+/* Congkak classroom layout: board and four answer choices visible together. */
+html.embed .wrap{display:grid!important;grid-template-rows:auto auto minmax(0,1fr);gap:9px!important}
+html.embed .score{display:flex;justify-content:space-between;font-size:clamp(11px,1vw,14px);color:#305b55}
+html.embed .board{width:100%;max-height:205px;min-height:148px;grid-template-rows:16px 49px 49px 19px!important;align-self:start;padding:9px 12px!important;row-gap:2px!important}
+html.embed .store{width:clamp(40px,5vw,74px);height:90px;aspect-ratio:auto;align-self:center}
+html.embed .hole{height:45px!important;width:45px!important;max-width:100%;aspect-ratio:1}
+html.embed .lab{font-size:clamp(9px,.92vw,12px);max-width:100%;min-height:0}
+html.embed .hole .n{font-size:16px}
+html.embed .qcard{display:flex;flex-direction:column;justify-content:flex-start;min-height:0!important;height:100%;max-height:100%;overflow:hidden!important;padding:10px 13px!important;gap:7px!important}
+html.embed .qhead{flex:0 0 auto}
+html.embed .q{font-size:clamp(12px,1.05vw,16px);flex:0 0 auto;line-height:1.3}
+html.embed .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:7px;flex:1 1 auto;overflow:hidden}
+html.embed .opt{font-size:clamp(11px,.95vw,14px);line-height:1.25;padding:8px;overflow:auto;max-height:100%}
+html.embed .fb{flex:0 0 auto}
+@media(max-height:650px){html.embed .wrap{gap:4px!important;padding:4px!important}html.embed .board{max-height:145px;min-height:115px;grid-template-rows:12px 35px 35px 14px!important;padding:5px!important}html.embed .hole{width:34px!important;height:34px!important}html.embed .store{height:66px}html.embed .qcard{gap:4px!important;padding:5px 8px!important}html.embed .opt{padding:4px;font-size:11px}}
+@media(max-width:650px){html.embed .lab{display:none}html.embed .board{grid-template-rows:5px 44px 44px 6px!important;min-height:120px}html.embed .hole{width:clamp(23px,6vw,39px)!important;height:clamp(23px,6vw,39px)!important}html.embed .store{height:70px;min-width:27px}html.embed .opts{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr))}}
+</style>
+
+<script>if(window.parent!==window)document.body?.classList.add("embedded");</script><div class="wrap">
+  <header>
+    <div class="eyebrow">KSG3613 Introduction to Ethics · Community and private practice</div>
+    <h1>Responsibility Congkak</h1>
+    <p>Each of your six holes holds 9 seeds and guards one responsibility to clients. Pick a hole and answer its question. Read carefully: several answers will sound reasonable, but only one is fully ethical. Get it right and you sow 3 seeds into your rumah. Get it wrong and 3 seeds drop across into the temptation above it, then into the conflicts store.</p>
+  </header>
+  <div class="score" id="score"></div>
+  <div class="board" id="board"></div>
+  <div class="legend" id="legend"></div>
+  <section class="qcard" id="qcard" aria-live="polite"></section>
+</div>
+
+<script>
+/* ============================================================
+   CONTENT: six responsibilities, three questions each (edit freely)
+   a = index of the right option
+   ============================================================ */
+const R = [
+ {name:"Payment",tempt:"Putting fees first",gist:"Fair, clear fees that never come before welfare",qs:[
+  {q:"Puan Rohana owes RM900 for ten sessions. She is no longer at risk and has stopped answering your calls. Your consent form said nothing about unpaid fees. What is the most defensible next step?",o:[
+    "Send the account to a collection agency, since she signed a form agreeing to your fee and has now stopped responding.",
+    "Write the debt off quietly and keep the door open, so that money never gets in the way of her care.",
+    "Contact her and offer a payment plan, but do not use an agency, as she was never told one might be used.",
+    "Keep her file on hold until the bill is settled, then release a copy promptly if she asks for it."],a:2,
+   why:"A collection agency can only be used if the client was told in advance. Writing off silently avoids a real issue, and holding records over unpaid fees is never acceptable."},
+  {q:"A smallholder in Raub has no cash and offers durian from his orchard as payment. Paying in produce is normal in his community. When would accepting be acceptable?",o:[
+    "When an independent price check shows the market value of the durian matches your usual fee exactly, so neither side gains.",
+    "When he proposes it himself, it is normal in his community, it does not exploit him and the terms are clear.",
+    "Never. Accepting goods for counselling always turns you into his customer as well as his counsellor, which is a dual relationship.",
+    "When you also lower your fee for the produce, so that the exchange clearly favours him rather than you."],a:1,
+   why:"Bartering is not banned outright. It is acceptable only when the client asks for it, it is culturally normal, it does not exploit the client and the terms are clear. Matching values alone is not enough."},
+  {q:"A well qualified psychiatrist offers you RM50 for each client you refer to him. Many of your clients do need medication reviews. What should you do?",o:[
+    "Accept, because you would be referring these clients to him anyway, so the payment does not change any clinical decision.",
+    "Accept, but tell each client about the payment in writing so they can make an informed choice about seeing him.",
+    "Decline the payment, and also stop referring to him so there is no appearance of a private arrangement.",
+    "Decline the payment, and keep referring clients to him whenever their needs call for a medication review."],a:3,
+   why:"Referral fees create a conflict of interest, even when disclosed. Refusing to refer at all overcorrects and harms clients who need him."}]},
+ {name:"Interruption and termination",tempt:"Abandoning clients",gist:"Never abandon a client in need",qs:[
+  {q:"After six months, a client is not improving but says your sessions are the only place she feels heard. You believe another type of therapy would help her more. What is the best course?",o:[
+    "Continue, because ending now would feel like rejection and could undo the trust she has finally built with you.",
+    "Reduce sessions to once a month so that she gradually depends on you less without feeling pushed away.",
+    "Share your view honestly, explore her feelings about ending and help her move to a better suited service.",
+    "End at the next session, explain your reasons kindly and give her a list of other centres she could contact."],a:2,
+   why:"Continuing without benefit is not kind, and an abrupt ending is abandonment. Ending should be discussed, planned and supported."},
+  {q:"A client can no longer pay and is not in crisis. You cannot afford to see him free. Is ending the relationship abandonment?",o:[
+    "Yes. Ending because a client cannot pay puts your income before his welfare, so it is always abandonment.",
+    "No, as long as you send him a clear letter after the last session explaining why the sessions had to stop.",
+    "Yes, unless he has already completed at least half of the sessions you planned together at the start.",
+    "No, provided you discuss it with him well before the last session and help him find affordable services."],a:3,
+   why:"Ending for nonpayment is allowed when the client is not in crisis, it is discussed in advance and a referral is offered. A letter afterwards is too late."},
+  {q:"You run a solo private practice. What should you arrange in case you suddenly die or become unable to work?",o:[
+    "A named colleague who is authorised to access your records, contact your clients and arrange their care.",
+    "An instruction for your family to destroy all client records promptly, so that no one else can ever read them.",
+    "A standing notice on your website telling clients how to collect their own files if the practice closes.",
+    "Nothing formal. Adult clients can find other counsellors on their own, and a plan could risk their privacy."],a:0,
+   why:"A professional will protects clients from sudden abandonment. Family members should not handle confidential records."}]},
+ {name:"Records",tempt:"Careless records",gist:"Accurate, secure and kept long enough",qs:[
+  {q:"An adult client asks to read her file. It includes your early note that she \"may have a personality disorder\", a view you no longer hold. What should you do?",o:[
+    "Remove the old note before she reads it, since keeping an inaccurate label in her file could harm her later.",
+    "Give her a careful written summary instead of the full file, so that early working notes do not upset her.",
+    "Refuse access, because the file is the practice's property and your working notes are written for professionals.",
+    "Allow access, offer to read it through with her and explain how and why your view has changed since then."],a:3,
+   why:"Clients generally have a right to see their records, and records must never be altered afterwards. Adding context is honest; deleting the note is not."},
+  {q:"A client mentions suicidal thoughts, and after assessing her you judge the risk to be low. What should your notes include?",o:[
+    "Nothing about suicide, so that a low risk comment cannot be misread if her records are ever subpoenaed.",
+    "What she said, how you assessed the risk, the reasons for your judgement and the safety plan you agreed.",
+    "A brief line stating \"Suicide risk assessed: low\", since a short note is clear and harder to misinterpret.",
+    "A full transcript of the session, so that every word is on record and nothing can be missed later."],a:1,
+   why:"Risk notes must show your reasoning. A one line verdict cannot be defended, and a full transcript is neither practical nor required."},
+  {q:"You saw a couple together. Now the husband alone asks for a copy of the joint file for his divorce lawyer. What should you do?",o:[
+    "Release only the parts of the file that record what he said, since those are his own words.",
+    "Give it to him, because he was a client in every one of those sessions and has a right to his record.",
+    "Release it only with written consent from both partners, unless a court orders it to be released.",
+    "Refuse permanently, because joint records hold two people's confidences and can therefore never be released."],a:2,
+   why:"A joint file holds both partners' confidences. Both must consent, unless a court orders release. Refusing permanently ignores lawful court orders."}]},
+ {name:"Advertising",tempt:"Deceptive adverts",gist:"Honest, never exploiting or deceiving",qs:[
+  {q:"You hold a PhD in Chemistry and a master's in counselling. How may you present yourself in adverts for your counselling practice?",o:[
+    "Write \"PhD\" after your name instead of \"Dr\" before it, since the letters are accurate and sound less like a medical title.",
+    "Use \"Dr\" freely, because it is a genuine doctorate that you earned and it is not a false claim.",
+    "Use \"Dr\" in printed adverts only, where there is room to list all of your qualifications in full.",
+    "Lead with your counselling degree, and if you mention the PhD, state clearly that it is in Chemistry."],a:3,
+   why:"Using an unrelated doctorate without saying what it is in implies doctoral training in counselling, which misleads the public."},
+  {q:"A former client who ended two years ago and is doing well offers to post a glowing review on your website. What is the main ethical concern?",o:[
+    "There is none, because she ended two years ago, offered freely and is no longer in a professional relationship with you.",
+    "She may still feel obliged to please you, and a public review reveals to everyone that she had counselling.",
+    "Reviews only become a problem if they mention fees or compare you favourably with named colleagues.",
+    "You must edit the review yourself before it is posted, to remove anything that could identify her."],a:1,
+   why:"Former clients can still be open to influence, and a review can expose their history. Editing it yourself makes it misleading."},
+  {q:"You work at a government clinic and run an evening private practice. A clinic client complains about the long waiting list. What should you do?",o:[
+    "Give her your private practice card but make no recommendation, so the choice stays entirely hers.",
+    "Help her within the clinic system, and do not use your clinic post to draw her into your private practice.",
+    "Offer her a private evening appointment, because her welfare matters more than the clinic's waiting list.",
+    "Be honest that clinic services are slow, so she can make an informed choice about private care elsewhere."],a:1,
+   why:"Using an agency position to draw clients into your private practice is a conflict of interest, even when the client is left to choose."}]},
+ {name:"Public statements",tempt:"Therapy on air",gist:"Educate the public; do not do therapy on air",qs:[
+  {q:"On a live radio show, a caller says she hurt herself last night and is frightened. What is the most appropriate response?",o:[
+    "Thank her and move straight to the next caller, because doing therapy on air would be unethical.",
+    "Offer a short supportive counselling session on air, since she reached out and other listeners may benefit.",
+    "Respond with care, give crisis contacts on air and have the producers take her details privately for follow up.",
+    "Ask her on air for her address and phone number so that emergency help can be sent to her straight away."],a:2,
+   why:"You must not do therapy on air, but you cannot ignore someone at risk. Show care, give resources and arrange private follow up."},
+  {q:"After your public talk on stress, someone asks whether she can stop her antidepressants because your tips have helped. What do you say?",o:[
+    "If she feels better, the stress tips may be enough on their own, but she should keep monitoring her mood.",
+    "Suggest she reduces the dose slowly rather than stopping suddenly, while continuing to use the tips.",
+    "Tell her firmly that antidepressants should never be stopped once started, to protect her from relapse.",
+    "Explain that only her doctor can advise on this, and encourage her to raise it at her next appointment."],a:3,
+   why:"Medication advice is outside a counsellor's competence. Saying it should never be stopped is also beyond your role."},
+  {q:"A TV producer asks you to analyse a politician's \"narcissistic traits\" from video clips. What is the best reply?",o:[
+    "Agree, but say clearly on air that it is only your personal opinion and not a professional diagnosis.",
+    "Decline, because counsellors should keep away from news programmes to protect the profession's neutrality.",
+    "Agree, as long as you describe only observable behaviours and avoid naming any specific diagnosis.",
+    "Decline to comment on his mental state, and offer instead to explain narcissism in general terms."],a:3,
+   why:"Commenting on the mental state of someone you have not assessed is unethical, however it is labelled. Media work itself is fine if it educates."}]},
+ {name:"Involuntary commitment",tempt:"Needless force",gist:"Protect safety with the least loss of freedom",qs:[
+  {q:"A client with psychosis refuses medication. He is eating, sleeping and has no thoughts of harming anyone. His family wants him admitted. What is the ethical position?",o:[
+    "Support admission, since his psychosis is untreated and he is unlikely to accept help without it.",
+    "Close the case, because he has the right to refuse treatment and you must respect his decision.",
+    "Refusal alone does not justify admission. Work with him and his family on voluntary options.",
+    "Suggest the family takes him to hospital for a \"check up\", so that qualified doctors can decide what is needed."],a:2,
+   why:"Involuntary admission needs serious danger or inability to care for oneself. Refusing treatment is not enough, and misleading him is dishonest."},
+  {q:"A client says she will jump from her flat tonight. She refuses all voluntary help, and no one can stay with her. What comes next?",o:[
+    "Ask her to sign a written safety agreement, then let her go home with crisis line numbers.",
+    "Start your centre's emergency procedure for urgent assessment, and tell her honestly what you are doing and why.",
+    "Let the session end calmly, then call the police after she leaves so that she does not panic or run.",
+    "Respect her autonomy, book her a session for tomorrow morning and phone her tonight to check on her."],a:1,
+   why:"There is immediate danger and no less restrictive option, so emergency action is justified. A written promise does not keep her safe, and acting behind her back is dishonest."},
+  {q:"After an involuntary admission, the client is furious and says she will never trust a counsellor again. What responsibility do you still have?",o:[
+    "Acknowledge her anger, explain your reasons honestly and help her return to voluntary care when she is ready.",
+    "None. Once she was admitted, responsibility for her care passed fully to the hospital team.",
+    "Explain the decision firmly and clearly until she accepts that it was the right thing to do.",
+    "Transfer her to another counsellor straight away, since trust with you may now be beyond repair."],a:0,
+   why:"The relationship continues after a crisis. Honest repair helps her return to care, while defending yourself or transferring her abruptly does not."}]}
+];
+const START=9, STAKE=3, PASS=0.7;
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+const REDUCE=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+const fresh=()=>({holes:R.map(()=>START),tempt:R.map(()=>0),mine:0,lost:0,next:R.map(()=>0),order:R.map(r=>shuffle([0,1,2])),cur:null,busy:false,log:[]});
+let S=fresh();
+const TOTAL=R.length*START, NEED=Math.ceil(TOTAL*PASS);
+
+/* ============================================================
+   BOARD
+   ============================================================ */
+function buildBoard(){
+  let h='<div class="store lost" id="sLost"><span class="seeds"></span><b>0</b><small>Conflicts</small></div><div class="store mine" id="sMine"><span class="seeds"></span><b>0</b><small>Your rumah</small></div>';
+  R.forEach((r,i)=>{ const col=i+2;
+    h+='<div class="lab top" style="grid-column:'+col+';grid-row:1">'+esc(r.tempt)+'</div>';
+    h+='<div class="hole tempt-h c'+(i+1)+'" id="t'+i+'" style="grid-column:'+col+';grid-row:2" aria-label="Temptation: '+esc(r.tempt)+'"><span class="seeds"></span></div>';
+    h+='<button class="hole c'+(i+1)+'" id="h'+i+'" data-h="'+i+'" style="grid-column:'+col+';grid-row:3" aria-label="'+esc(r.name)+'"><span class="seeds"></span><span class="n">'+(i+1)+'</span></button>';
+    h+='<div class="lab bot" style="grid-column:'+col+';grid-row:4">'+esc(r.name)+'</div>'; });
+  $("board").innerHTML=h;
+  $("board").classList.add("mine-row");
+  $("legend").innerHTML='<div style="grid-column:1/-1" class="hint">Left store: conflicts (dropped seeds). Right store: your rumah.</div>'+R.map((r,i)=>'<div class="c'+(i+1)+'"><i>'+(i+1)+'</i>'+esc(r.name)+'</div>').join('');
+}
+const dots=(el,n)=>{ el.querySelector(".seeds").innerHTML=Array.from({length:Math.min(n,24)},()=>'<i></i>').join(''); };
+function paint(){
+  R.forEach((r,i)=>{ const h=$("h"+i); dots(h,S.holes[i]); dots($("t"+i),S.tempt[i]);
+    const done=S.next[i]>=3; h.disabled=done||S.busy; h.classList.toggle("empty",done); h.classList.toggle("pick",!done&&!S.busy&&S.cur===null);
+    h.classList.toggle("active",S.cur===i); h.setAttribute("aria-label",r.name+": "+(3-S.next[i])+" questions left, "+S.holes[i]+" seeds"); });
+  dots($("sMine"),S.mine); $("sMine").querySelector("b").textContent=S.mine;
+  dots($("sLost"),S.lost); $("sLost").querySelector("b").textContent=S.lost;
+  const answered=S.log.length;
+  $("score").innerHTML='<span>Your rumah <b>'+S.mine+'</b> of '+TOTAL+'</span><span>Dropped <b>'+S.lost+'</b></span><span>Questions <b>'+answered+'</b> of '+(R.length*3)+'</span><span>Pass at <b>'+NEED+'</b> seeds</span>';
+}
+const centre=el=>{ const b=$("board").getBoundingClientRect(), r=el.getBoundingClientRect(); return {x:r.left-b.left+r.width/2,y:r.top-b.top+r.height*0.7}; };
+function fly(fromEl,toEl,cls){ return new Promise(res=>{ const s=document.createElement("i"); s.className="fly"+(cls?" "+cls:""); const a=centre(fromEl), b=centre(toEl);
+  s.style.left=a.x+"px"; s.style.top=a.y+"px"; $("board").appendChild(s);
+  if(REDUCE){ s.remove(); res(); return; }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ s.style.transform="translate("+(b.x-a.x)+"px,"+(b.y-a.y)+"px)"; }));
+  setTimeout(()=>{ s.remove(); res(); },cls?520:340); }); }
+const wait=ms=>new Promise(r=>setTimeout(r,REDUCE?0:ms));
+async function sow(i){ // right answer: sow 3 seeds along the row to your rumah, congkak style
+  for(let k=0;k<STAKE;k++){
+    S.holes[i]--; paint();
+    let prev=$("h"+i);
+    for(let j=i+1;j<R.length;j++){ await fly(prev,$("h"+j)); prev=$("h"+j); }
+    await fly(prev,$("sMine")); S.mine++; paint();
+  }
+}
+async function drop(i){ // wrong answer: 3 seeds drop to the temptation, then roll to the conflicts store
+  for(let k=0;k<STAKE;k++){ S.holes[i]--; paint(); await fly($("h"+i),$("t"+i),"drop"); S.tempt[i]++; paint(); await wait(60); }
+  await wait(250);
+  for(let k=0;k<STAKE;k++){ let prev=$("t"+i); for(let j=i-1;j>=0;j--){ await fly(prev,$("t"+j)); prev=$("t"+j); } await fly(prev,$("sLost")); S.tempt[i]--; S.lost++; paint(); }
+  const s=$("sLost"); s.classList.remove("shake"); void s.offsetWidth; s.classList.add("shake");
+}
+
+/* ============================================================
+   QUESTIONS
+   ============================================================ */
+function idle(msg){
+  const q=$("qcard"); q.className="qcard";
+  q.innerHTML='<div class="eyebrow">Your turn</div><h2>'+(msg||"Pick a hole to play.")+'</h2><p class="hint">Tap any glowing hole on the bottom row. Each hole asks three questions about its responsibility.</p>';
+}
+function ask(i){
+  S.cur=i; paint();
+  const r=R[i], qi=S.order[i][S.next[i]], item=r.qs[qi];
+  const opts=shuffle(item.o.map((t,k)=>({t,k})));
+  const q=$("qcard"); q.className="qcard c"+(i+1);
+  q.innerHTML='<div class="qhead"><span class="dot">'+(i+1)+'</span><div><h2>'+esc(r.name)+'</h2><div class="sub">'+esc(r.gist)+' · Question '+(S.next[i]+1)+' of 3</div></div></div>'+
+    '<p class="q">'+esc(item.q)+'</p><div class="opts">'+opts.map(o=>'<button class="opt" data-k="'+o.k+'">'+esc(o.t)+'</button>').join('')+'</div><div id="fb"></div>';
+  const first=q.querySelector(".opt"); if(first) first.focus({preventScroll:true});
+  if(!document.documentElement.classList.contains("embed"))q.scrollIntoView({behavior:REDUCE?"auto":"smooth",block:"nearest"});
+}
+async function answer(k){
+  if(S.busy||S.cur===null) return;
+  const i=S.cur, r=R[i], qi=S.order[i][S.next[i]], item=r.qs[qi], right=k===item.a;
+  S.busy=true;
+  $("qcard").querySelectorAll(".opt").forEach(b=>{ b.disabled=true; const kk=+b.dataset.k; if(kk===item.a) b.classList.add("right"); else if(kk===k) b.classList.add("wrong"); });
+  $("fb").innerHTML='<div class="fb '+(right?'good':'bad')+'"><b>'+(right?'Right. 3 seeds sown into your rumah.':'Not quite. 3 seeds dropped.')+'</b> '+esc(item.why)+'</div>';
+  const h=$("h"+i); h.classList.remove("flashG","flashB"); void h.offsetWidth; h.classList.add(right?"flashG":"flashB");
+  S.log.push({r:r.name,q:item.q,right});
+  S.next[i]++; paint();
+  if(right) await sow(i); else await drop(i);
+  S.busy=false; S.cur=null; paint();
+  if(S.log.length>=R.length*3) return finish();
+  const fbx=$("fb"); if(fbx) fbx.insertAdjacentHTML("beforeend",'<p class="hint" style="margin-top:8px">Pick your next hole on the board.</p>');
+}
+function finish(){
+  const pass=S.mine>=NEED, q=$("qcard"); q.className="qcard";
+   if(window.parent!==window){window.parent.postMessage({type:"ethics-congkak-finished",pass,seeds:S.mine,total:TOTAL},location.origin);}
+  const rows=R.map((r,i)=>{ const got=S.log.filter(l=>l.r===r.name&&l.right).length; return '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+'</td><td class="n">'+got+' of 3</td><td class="n">'+(got*STAKE)+'</td></tr>'; }).join('');
+  q.innerHTML='<div class="eyebrow">Game over</div><div class="big '+(pass?'good':'bad')+'">'+S.mine+' / '+TOTAL+'</div>'+
+    '<h2>'+(pass?'Well played. Your rumah is full of good practice.':'Too many seeds were dropped to conflicts of interest.')+'</h2>'+
+    '<p>'+(pass?'You kept your responsibilities to clients ahead of your own interests.':'You need '+NEED+' seeds to pass. Read the six responsibilities again, then play a new game.')+'</p>'+
+    '<div class="tbl"><table><thead><tr><th>#</th><th>Responsibility</th><th>Right</th><th>Seeds</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    (pass?'':'<ul style="margin:0;padding-left:20px">'+R.map(r=>'<li><b>'+esc(r.name)+':</b> '+esc(r.gist)+'</li>').join('')+'</ul>')+
+    '<div class="actions"><button class="btn" id="again">Play a new game</button></div>';
+  if(!document.documentElement.classList.contains("embed"))q.scrollIntoView({behavior:REDUCE?"auto":"smooth",block:"nearest"});
+}
+
+/* ============================================================
+   EVENTS AND BOOT
+   ============================================================ */
+document.addEventListener("click",e=>{
+  const h=e.target.closest("[data-h]"); if(h&&!h.disabled&&!S.busy&&S.cur===null){ ask(+h.dataset.h); return; }
+  const o=e.target.closest(".opt"); if(o&&!o.disabled){ answer(+o.dataset.k); return; }
+  if(e.target.id==="again"){ S=fresh(); paint(); idle("New game. Pick a hole to play."); if(!document.documentElement.classList.contains("embed"))window.scrollTo({top:0,behavior:REDUCE?"auto":"smooth"}); }
+});
+try{ window.claude?.hot?.snapshot?.(()=>({...S,busy:false})); }catch(e){}
+const boot=d=>{ if(d&&d.holes) S=d; buildBoard(); paint(); if(S.log.length>=R.length*3) finish(); else if(S.cur!==null){ const c=S.cur; S.cur=null; ask(c); } else idle(); };
+window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+</script>
